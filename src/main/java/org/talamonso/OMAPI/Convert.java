@@ -1,6 +1,8 @@
 package org.talamonso.OMAPI;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.StringTokenizer;
 
@@ -61,10 +63,11 @@ public final class Convert {
    * @return yyyy/MM/dd HH:mm:ss
    */
   protected static String hex2date(byte[] b) {
-    long val = Convert.unsignedIntToLong(b);
-    Instant instant = Instant.ofEpochMilli(val * 1000);
+    long epochSeconds = Convert.unsignedIntToLong(b);
+    Instant instant = Instant.ofEpochSecond(epochSeconds);
+    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
     DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-    return formatter.format(instant);
+    return formatter.format(zonedDateTime);
   }
 
   /**
