@@ -11,20 +11,20 @@ import org.talamonso.OMAPI.Objects.Group;
  */
 public class Group_Delete {
 
-	/**
-	 * Delete a group object.
-	 * 
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-		Connection c = Default.getC();
-		try {
-			Group g = new Group(c);
-			g.setName("group");
-			g.delete();
-		} catch (OmapiException e) {
-			System.err.println(e.getMessage());
-		}
-		c.close();
-	}
+  /**
+   * Delete a group object.
+   * 
+   * @param args
+   */
+  public static void main(final String[] args) {
+    Connection c = Default.getC();
+    try {
+      Group g = new Group(c);
+      g.setName("group");
+      g.delete();
+    } catch (OmapiException e) {
+      System.err.println(e.getMessage());
+    }
+    c.close();
+  }
 }

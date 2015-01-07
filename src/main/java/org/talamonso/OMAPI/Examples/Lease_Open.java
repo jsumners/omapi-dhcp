@@ -12,21 +12,21 @@ import org.talamonso.OMAPI.Objects.Lease;
  */
 public class Lease_Open {
 
-	/**
-	 * Opens a lease object and print out some informations.
-	 * 
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-		Connection c = Default.getC();
-		try {
-			Lease l = new Lease(c);
-			l.setIPAddress("192.168.1.23");
-			Lease remote = l.send(Message.OPEN);
-			System.out.println(remote);
-		} catch (OmapiException e) {
-			System.err.println(e.getMessage());
-		}
-		c.close();
-	}
+  /**
+   * Opens a lease object and print out some informations.
+   * 
+   * @param args
+   */
+  public static void main(final String[] args) {
+    Connection c = Default.getC();
+    try {
+      Lease l = new Lease(c);
+      l.setIPAddress("192.168.1.23");
+      Lease remote = l.send(Message.OPEN);
+      System.out.println(remote);
+    } catch (OmapiException e) {
+      System.err.println(e.getMessage());
+    }
+    c.close();
+  }
 }

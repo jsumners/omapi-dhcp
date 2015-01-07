@@ -11,20 +11,20 @@ import org.talamonso.OMAPI.Objects.Host;
  */
 public class Host_Delete {
 
-	/**
-	 * delete a host without notification.
-	 * 
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-		Connection c = Default.getC();
-		try {
-			Host h = new Host(c);
-			h.setName("albert");
-			h.delete();
-		} catch (OmapiException e) {
-			System.err.println(e.getMessage());
-		}
-		c.close();
-	}
+  /**
+   * delete a host without notification.
+   * 
+   * @param args
+   */
+  public static void main(final String[] args) {
+    Connection c = Default.getC();
+    try {
+      Host h = new Host(c);
+      h.setName("albert");
+      h.delete();
+    } catch (OmapiException e) {
+      System.err.println(e.getMessage());
+    }
+    c.close();
+  }
 }

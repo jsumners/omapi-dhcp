@@ -12,21 +12,21 @@ import org.talamonso.OMAPI.Objects.Control;
  */
 public class Control_ShutDown {
 
-	/**
-	 * shut down the DHCP server immediatly.
-	 * 
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-		Connection c = Default.getC();
-		try {
-			Control con = new Control(c);
-			con.shutdown();
-			Control remote = con.send(Message.OPEN);
-			System.out.println(remote);
-		} catch (OmapiException e) {
-			System.err.println(e.getMessage());
-		}
-		c.close();
-	}
+  /**
+   * shut down the DHCP server immediatly.
+   * 
+   * @param args
+   */
+  public static void main(final String[] args) {
+    Connection c = Default.getC();
+    try {
+      Control con = new Control(c);
+      con.shutdown();
+      Control remote = con.send(Message.OPEN);
+      System.out.println(remote);
+    } catch (OmapiException e) {
+      System.err.println(e.getMessage());
+    }
+    c.close();
+  }
 }

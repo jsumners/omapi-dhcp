@@ -6,21 +6,21 @@ package org.talamonso.OMAPI.Exceptions;
  */
 public class OmapiConnectionException extends OmapiException {
 
-	private static final long serialVersionUID = 4949702170705997465L;
+  private static final long serialVersionUID = 4949702170705997465L;
 
-	/**
-	 * Standard constructor
-	 */
-	public OmapiConnectionException() {
-		super();
-	}
+  /**
+   * Standard constructor
+   */
+  public OmapiConnectionException() {
+    super();
+  }
 
-	/**
-	 * Standard constructor with message
-	 * 
-	 * @param errorMessage
-	 */
-	public OmapiConnectionException(String errorMessage) {
-		super(errorMessage);
-	}
+  /**
+   * Standard constructor with message
+   * 
+   * @param errorMessage
+   */
+  public OmapiConnectionException(String errorMessage) {
+    super(errorMessage);
+  }
 }
