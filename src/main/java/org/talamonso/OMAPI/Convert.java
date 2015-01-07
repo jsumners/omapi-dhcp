@@ -1,15 +1,11 @@
 package org.talamonso.OMAPI;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.SimpleTimeZone;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.StringTokenizer;
 
-import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-
 import com.widget.util.Hex;
+import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 
 /**
  * Class to convert entries. A few methods used by the OMAPI implementation which are not covered by the imported
@@ -66,11 +62,9 @@ public final class Convert {
    */
   protected static String hex2date(byte[] b) {
     long val = Convert.unsignedIntToLong(b);
-    Calendar cal = new GregorianCalendar();
-    cal.setTimeInMillis(val * 1000);
-    DateFormat fmt = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    fmt.setTimeZone(new SimpleTimeZone(0, "UTC"));
-    return fmt.format(cal.getTime());
+    Instant instant = Instant.ofEpochMilli(val * 1000);
+    DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+    return formatter.format(instant);
   }
 
   /**
