@@ -22,45 +22,6 @@ public abstract class Message {
   private static final Logger log = LoggerFactory.getLogger(Message.class);
 
   /**
-   * indicates a create Message
-   */
-  public static final int CREATE = 7;
-
-  /**
-   * indicates a delete Message
-   */
-  public static final int DELETE = 8;
-
-  /**
-   * indicates an error Message
-   */
-  public static final int ERROR = 5;
-
-  /**
-   * indicates a notify Message
-   */
-  public static final int NOTIFY = 4;
-
-  /**
-   * indicates an open Message
-   */
-  public static final int OPEN = 1;
-
-  /**
-   * indicates a refresh Message
-   */
-  public static final int REFRESH = 2;
-
-  /**
-   * indicates an update Message
-   */
-  public static final int UPDATE = 9;
-
-  private static final int DEL = 6;
-
-  private static final int UPD = 3;
-
-  /**
    * The Answer of the dhcp server. Filled if this message was sent.
    */
   private byte[] answer = new byte[0];
@@ -178,11 +139,14 @@ public abstract class Message {
    * @throws OmapiObjectException if the Object has an error
    */
   public void delete() throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(Message.DELETE);
+    this.opcode = Convert.intTo4ByteArray(MessageType.DELETE);
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
     // We first need to have a handle!
-    new EmptyMessage(this.connection, this.sendMessage(Message.OPEN)).sendMessage(Message.DEL);
+    new EmptyMessage(
+      this.connection,
+      this.sendMessage(MessageType.OPEN)
+    ).sendMessage(MessageType.DEL);
   }
 
   /**
@@ -197,7 +161,7 @@ public abstract class Message {
   public Message getMessageViaHandle(int h) throws OmapiException {
     Message x = new EmptyMessage(this.connection);
     x.handle = Convert.intTo4ByteArray(h);
-    x = new EmptyMessage(this.connection, x.sendMessage(Message.REFRESH));
+    x = new EmptyMessage(this.connection, x.sendMessage(MessageType.REFRESH));
     return x;
   }
 
@@ -329,7 +293,7 @@ public abstract class Message {
   private byte[] commit(int action) throws OmapiConnectionException {
     log.debug(
       "Trying to {} {}",
-      this.decodeAction(action),
+      MessageType.nameForValue(action),
       this.getClass().getName()
     );
 
@@ -348,7 +312,7 @@ public abstract class Message {
     this.connection.updateInit();
     log.debug(
       " - Successfully {}ed ...",
-      this.decodeAction(action)
+      MessageType.nameForValue(action)
     );
 
     return this.answer;
@@ -503,44 +467,6 @@ public abstract class Message {
   }
 
   /**
-   * Decodes the actions used and supported by the DHCP server.
-   * 
-   * @param action int Value. In normal case represented by a constant like {@value #OPEN}
-   * @return String representating the action code
-   */
-  protected String decodeAction(int action) {
-    String result = "unknown";
-
-    switch (action) {
-      case 1: // this.OPEN
-        result = "OPEN";
-        break;
-      case 2: // this.REFRESH
-        result = "REFRESH";
-        break;
-      case 3: // this.UPDATE
-        result = "UPDATE";
-        break;
-      case 4: // this.NOTIFY
-        result = "NOTIFY";
-        break;
-      case 5: // this.ERROR
-        result = "ERROR";
-        break;
-      case 6: // this.DELETE
-        result = "DELETE";
-        break;
-      case 7: // this.CREATE
-        result = "CREATE";
-        break;
-      default:
-        break;
-    }
-
-    return result;
-  }
-
-  /**
    * Get the specified message of this Message object
    * 
    * @param key The key of the requested value
@@ -678,34 +604,42 @@ public abstract class Message {
     this.opcode = Convert.intTo4ByteArray(action);
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
+
     switch (action) {
-    case DEL:
-    case REFRESH: {
-      // We don't need to have the payload for DELETE and REFRESH
-      this.msg = new LinkedHashMap();
-      this.obj = new LinkedHashMap();
+      case MessageType.DEL:
+      case MessageType.REFRESH:
+        // We don't need to have the payload for DELETE and REFRESH
+        this.msg = new LinkedHashMap();
+        this.obj = new LinkedHashMap();
+        // break for REFRESH!
+        break;
+
+      case MessageType.CREATE:
+        this.handle = Convert.intTo4ByteArray(1);
+        this.opcode = Convert.intTo4ByteArray(MessageType.OPEN);
+        this.addMsg("create", Convert.intTo4ByteArray(1));
+        this.addMsg("exclusive", Convert.intTo4ByteArray(1));
+        break;
+
+      case MessageType.UPDATE:
+        EmptyMessage in = new EmptyMessage(
+          this.connection,
+          this.sendMessage(MessageType.OPEN)
+        );
+        in.obj = this.upd_obj;
+        in.sendMessage(MessageType.UPD);
+        // FIXME: I don't like this return. ~ jsumners
+        return in.sendMessage(MessageType.REFRESH);
+        //break;
+
+      case MessageType.OPEN:
+      case MessageType.UPD:
+        break;
+
+      default:
+        throw new OmapiConnectionException("Unknown command");
     }
-      // break for REFRESH!
-      break;
-    case CREATE: {
-      this.handle = Convert.intTo4ByteArray(1);
-      this.opcode = Convert.intTo4ByteArray(Message.OPEN);
-      this.addMsg("create", Convert.intTo4ByteArray(1));
-      this.addMsg("exclusive", Convert.intTo4ByteArray(1));
-    }
-      break;
-    case UPDATE: {
-      EmptyMessage in = new EmptyMessage(this.connection, this.sendMessage(Message.OPEN));
-      in.obj = this.upd_obj;
-      in.sendMessage(Message.UPD);
-      return in.sendMessage(Message.REFRESH);
-    }
-    case OPEN:
-    case UPD:
-      break;
-    default:
-      throw new OmapiConnectionException("Unknown command");
-    }
+
     return this.commit(action);
   }
 

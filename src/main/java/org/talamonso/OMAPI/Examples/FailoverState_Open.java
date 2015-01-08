@@ -1,8 +1,8 @@
 package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
-import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
+import org.talamonso.OMAPI.MessageType;
 import org.talamonso.OMAPI.Objects.FailoverState;
 
 /**
@@ -22,7 +22,7 @@ public class FailoverState_Open {
     try {
       FailoverState fos = new FailoverState(c);
       fos.setName("dhcpd-sv");
-      FailoverState remote = fos.send(Message.OPEN);
+      FailoverState remote = fos.send(MessageType.OPEN);
       System.out.println(remote.toString());
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

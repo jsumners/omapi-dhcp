@@ -1,8 +1,8 @@
 package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
-import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
+import org.talamonso.OMAPI.MessageType;
 import org.talamonso.OMAPI.Objects.Host;
 
 /**
@@ -25,7 +25,7 @@ public class Host_Create {
       h.setIPAddress("1.2.3.4,1.2.3.5");
       h.setHardwareAddress("00:00:00:00:00:11");
       h.setHardwareType(1);
-      Host remote = h.send(Message.CREATE);
+      Host remote = h.send(MessageType.CREATE);
       System.out.println(remote);
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

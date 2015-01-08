@@ -1,8 +1,8 @@
 package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
-import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
+import org.talamonso.OMAPI.MessageType;
 import org.talamonso.OMAPI.Objects.Group;
 
 /**
@@ -23,7 +23,7 @@ public class Group_Create {
       Group g = new Group(c);
       g.setName("group");
       g.setStatement("dynamic");
-      Group remote = g.send(Message.CREATE);
+      Group remote = g.send(MessageType.CREATE);
       System.out.println(remote);
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

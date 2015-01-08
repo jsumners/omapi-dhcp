@@ -143,7 +143,7 @@ public class Connection {
       this.keyName = name;
       this.key = new sun.misc.BASE64Decoder().decodeBuffer(k);
       Authenticator a = new Authenticator(this, name);
-      a.send(Message.OPEN);
+      a.send(MessageType.OPEN);
       this.useAuth = true;
     } catch (Exception e) {
       this.key = null;
@@ -174,7 +174,7 @@ public class Connection {
       sb.append(" Key Name:               " + this.keyName + "\n");
       sb.append(" Secret Key:            " + Hex.toHexF(this.key));
     }
-    
+
     return sb.toString();
   }
 

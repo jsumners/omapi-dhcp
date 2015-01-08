@@ -1,8 +1,8 @@
 package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
-import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
+import org.talamonso.OMAPI.MessageType;
 import org.talamonso.OMAPI.Objects.Host;
 
 /**
@@ -24,7 +24,7 @@ public class Host_Update {
       Host h = new Host(c);
       h.setName("albert");
       h.updateIPAddress("1.3.1.46");
-      Host remote = h.send(Message.UPDATE);
+      Host remote = h.send(MessageType.UPDATE);
       System.out.println(remote.toString());
     } catch (OmapiException e) {
       System.err.println(e.getMessage());
