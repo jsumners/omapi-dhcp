@@ -101,16 +101,16 @@ public class Host extends Message {
   /**
    * Send this host object to the DHCP server and returns the answer as a new host object.
    * 
-   * @param option like Message.OPEN, Message.DELETE, ...
+   * @param messageType like MessageType.OPEN, MessageType.DELETE, ...
    * @return answer from the server as a new Host object
    * @throws OmapiObjectException is thrown, if Object creation fails
    * @throws OmapiInitException is thrown, if initialisation if connection fails
    * @throws OmapiConnectionException is thrown if connection fails
    */
-  public Host send(int option) throws OmapiException {
+  public Host send(MessageType messageType) throws OmapiException {
     return new Host(
       this.connection,
-      super.sendMessage(new MessageType(option))
+      super.sendMessage(messageType)
     );
   }
 

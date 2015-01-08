@@ -42,16 +42,16 @@ public class Control extends Message {
   /**
    * Send the control object to the DHCP server.
    * 
-   * @param option
+   * @param messageType
    * @return the control object answer from the server
    * @throws OmapiObjectException
    * @throws OmapiInitException
    * @throws OmapiConnectionException
    */
-  public Control send(int option) throws OmapiException {
+  public Control send(MessageType messageType) throws OmapiException {
     return new Control(
       this.connection,
-      super.sendMessage(new MessageType(option))
+      super.sendMessage(messageType)
     );
   }
 

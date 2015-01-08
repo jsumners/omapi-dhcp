@@ -44,16 +44,16 @@ public class Authenticator extends Message {
   /**
    * Send the authenticator to the server
    * 
-   * @param option
+   * @param messageType
    * @return returns a new authenticator object with the response of the Server
    * @throws OmapiConnectionException
    * @throws OmapiObjectException
    * @throws OmapiInitException
    */
-  public Authenticator send(int option) throws OmapiException {
+  public Authenticator send(MessageType messageType) throws OmapiException {
     return new Authenticator(
       this.connection,
-      this.sendMessage(new MessageType(option))
+      this.sendMessage(messageType)
     );
   }
 }

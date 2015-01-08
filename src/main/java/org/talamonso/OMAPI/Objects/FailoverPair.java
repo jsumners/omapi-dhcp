@@ -196,7 +196,7 @@ public class FailoverPair extends Message {
    * @param failoverState
    */
   public void updateLocalState(FailoverState failoverState) {
-    this.updateObjectAsInt("local-state", failoverState.getState());
+    this.updateObjectAsInt("local-state", failoverState.value());
   }
 
   /**

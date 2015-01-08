@@ -11,30 +11,24 @@ public class FailoverStateTest {
 
   @Before
   public void setup() throws Exception {
-    this.failoverState = new FailoverState(FailoverState.NORMAL);
+    this.failoverState = FailoverState.NORMAL;
   }
 
   @Test
   public void testGetState() throws Exception {
-    int state = this.failoverState.getState();
-    assertTrue(state == FailoverState.NORMAL);
-  }
-
-  @Test
-  public void testNameForValue() throws Exception {
-    String name = FailoverState.nameForValue(this.failoverState);
-    assertTrue(name.equals("NORMAL"));
+    String state = this.failoverState.getState();
+    assertTrue(state.equals("NORMAL"));
   }
 
   @Test
   public void testCompareTo() throws Exception {
-    FailoverState localState = new FailoverState(FailoverState.NORMAL);
+    FailoverState localState = FailoverState.NORMAL;
     assertTrue(this.failoverState.compareTo(localState) == 0);
 
     localState = new FailoverState(-1);
     assertTrue(this.failoverState.compareTo(localState) < 0);
 
-    localState = new FailoverState(FailoverState.SHUTDOWN);
+    localState = FailoverState.SHUTDOWN;
     assertTrue(this.failoverState.compareTo(localState) > 0);
   }
 }

@@ -10,36 +10,44 @@ public class MessageTypeTest {
 
   @Before
   public void setup() throws Exception {
-    this.messageType = new MessageType(MessageType.CREATE);
+    this.messageType = MessageType.CREATE;
   }
 
   @Test
   public void testGetType() throws Exception {
-    int type = this.messageType.getType();
-    assertTrue(type == MessageType.CREATE);
-  }
-
-  @Test
-  public void testNameForType() throws Exception {
-    String name = MessageType.nameForType(this.messageType);
-    assertTrue(name.equals("CREATE"));
-  }
-
-  @Test
-  public void testNameForValue() throws Exception {
-    String name = MessageType.nameForValue(MessageType.CREATE);
-    assertTrue(name.equals("CREATE"));
+    String type = this.messageType.getType();
+    assertTrue(type.equals(MessageType.CREATE.getType()));
   }
 
   @Test
   public void testCompareTo() throws Exception {
-    MessageType localMessage = new MessageType(MessageType.CREATE);
+    MessageType localMessage = MessageType.CREATE;
     assertTrue(this.messageType.compareTo(localMessage) == 0);
 
-    localMessage = new MessageType(MessageType.OPEN);
+    localMessage = MessageType.OPEN;
     assertTrue(this.messageType.compareTo(localMessage) < 0);
 
-    localMessage = new MessageType(MessageType.DELETE);
+    localMessage = MessageType.DELETE;
     assertTrue(this.messageType.compareTo(localMessage) > 0);
+  }
+
+  @Test
+  public void testValue() throws Exception {
+    assertTrue(this.messageType.value() == MessageType.CREATE_VALUE);
+  }
+
+  @Test
+  public void testTypeOf() throws Exception {
+    assertTrue(MessageType.typeOf(-1).getType().equals("UNKNOWN"));
+  }
+
+  @Test
+  public void testTypeForValue() throws Exception {
+    assertTrue(MessageType.typeForValue(-1).equals("UNKNOWN"));
+  }
+
+  @Test
+  public void testValueForType() throws Exception {
+    assertTrue(MessageType.valueForType("UNKNOWN") == -1);
   }
 }

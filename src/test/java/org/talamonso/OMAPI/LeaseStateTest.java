@@ -11,30 +11,30 @@ public class LeaseStateTest {
 
   @Before
   public void setup() throws Exception {
-    this.leaseState = new LeaseState(LeaseState.FREE);
+    this.leaseState = LeaseState.FREE;
   }
 
   @Test
   public void testGetState() throws Exception {
-    int state = this.leaseState.getState();
-    assertTrue(state == LeaseState.FREE);
+    String state = this.leaseState.getState();
+    assertTrue(state.equals("FREE"));
   }
 
   @Test
   public void testNameForValue() throws Exception {
-    String name = LeaseState.nameForValue(this.leaseState);
+    String name = LeaseState.stateForValue(this.leaseState.value());
     assertTrue(name.equals("FREE"));
   }
 
   @Test
   public void testCompareTo() throws Exception {
-    LeaseState localState = new LeaseState(LeaseState.FREE);
+    LeaseState localState = LeaseState.FREE;
     assertTrue(this.leaseState.compareTo(localState) == 0);
 
     localState = new LeaseState(-1);
     assertTrue(this.leaseState.compareTo(localState) < 0);
 
-    localState = new LeaseState(LeaseState.ABANDONDED);
+    localState = LeaseState.ABANDONDED;
     assertTrue(this.leaseState.compareTo(localState) > 0);
   }
 }

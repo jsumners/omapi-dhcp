@@ -22,7 +22,7 @@ public class FailoverState_Open {
     try {
       FailoverPair fos = new FailoverPair(c);
       fos.setName("dhcpd-sv");
-      FailoverPair remote = fos.send(new MessageType(MessageType.OPEN));
+      FailoverPair remote = fos.send(MessageType.OPEN);
       System.out.println(remote.toString());
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

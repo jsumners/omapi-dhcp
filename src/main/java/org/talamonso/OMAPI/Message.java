@@ -139,14 +139,14 @@ public abstract class Message {
    * @throws OmapiObjectException if the Object has an error
    */
   public void delete() throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(MessageType.DELETE);
+    this.opcode = Convert.intTo4ByteArray(MessageType.DELETE_VALUE);
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
     // We first need to have a handle!
     new EmptyMessage(
       this.connection,
-      this.sendMessage(new MessageType(MessageType.OPEN))
-    ).sendMessage(new MessageType(MessageType.DEL));
+      this.sendMessage(MessageType.OPEN)
+    ).sendMessage(MessageType.DEL);
   }
 
   /**
@@ -163,7 +163,7 @@ public abstract class Message {
     x.handle = Convert.intTo4ByteArray(h);
     x = new EmptyMessage(
       this.connection,
-      x.sendMessage(new MessageType(MessageType.REFRESH))
+      x.sendMessage(MessageType.REFRESH)
     );
     return x;
   }
@@ -296,7 +296,7 @@ public abstract class Message {
   private byte[] commit(int action) throws OmapiConnectionException {
     log.debug(
       "Trying to {} {}",
-      MessageType.nameForValue(action),
+      MessageType.typeForValue(action),
       this.getClass().getName()
     );
 
@@ -315,7 +315,7 @@ public abstract class Message {
     this.connection.updateInit();
     log.debug(
       " - Successfully {}ed ...",
-      MessageType.nameForValue(action)
+      MessageType.typeForValue(action)
     );
 
     return this.answer;
@@ -610,46 +610,46 @@ public abstract class Message {
    * @throws OmapiObjectException if the Object has an error
    */
   protected byte[] sendMessage(MessageType messageType) throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(messageType.getType());
+    this.opcode = Convert.intTo4ByteArray(messageType.value());
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
 
-    switch (messageType.getType()) {
-      case MessageType.DEL:
-      case MessageType.REFRESH:
+    switch (messageType.value()) {
+      case MessageType.DEL_VALUE:
+      case MessageType.REFRESH_VALUE:
         // We don't need to have the payload for DELETE and REFRESH
         this.msg = new LinkedHashMap();
         this.obj = new LinkedHashMap();
         // break for REFRESH!
         break;
 
-      case MessageType.CREATE:
+      case MessageType.CREATE_VALUE:
         this.handle = Convert.intTo4ByteArray(1);
-        this.opcode = Convert.intTo4ByteArray(MessageType.OPEN);
+        this.opcode = Convert.intTo4ByteArray(MessageType.OPEN.value());
         this.addMsg("create", Convert.intTo4ByteArray(1));
         this.addMsg("exclusive", Convert.intTo4ByteArray(1));
         break;
 
-      case MessageType.UPDATE:
+      case MessageType.UPDATE_VALUE:
         EmptyMessage in = new EmptyMessage(
           this.connection,
-          this.sendMessage(new MessageType(MessageType.OPEN))
+          this.sendMessage(MessageType.OPEN)
         );
         in.obj = this.upd_obj;
-        in.sendMessage(new MessageType(MessageType.UPD));
+        in.sendMessage(MessageType.UPD);
         // FIXME: I don't like this return. ~ jsumners
-        return in.sendMessage(new MessageType(MessageType.REFRESH));
+        return in.sendMessage(MessageType.REFRESH);
         //break;
 
-      case MessageType.OPEN:
-      case MessageType.UPD:
+      case MessageType.OPEN_VALUE:
+      case MessageType.UPD_VALUE:
         break;
 
       default:
         throw new OmapiConnectionException("Unknown command");
     }
 
-    return this.commit(messageType.getType());
+    return this.commit(messageType.value());
   }
 
   /**
