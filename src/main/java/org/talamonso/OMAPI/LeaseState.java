@@ -1,6 +1,10 @@
 package org.talamonso.OMAPI;
 
-public class LeaseState {
+import java.io.Serializable;
+
+public class LeaseState implements Comparable<LeaseState>, Serializable {
+  private static final long serialVersionUID = 1L;
+
   public static final int FREE = 1;
   public static final int ACTIVE = 2;
   public static final int EXPIRED = 3;
@@ -11,6 +15,19 @@ public class LeaseState {
   public static final int RESERVED = 8;
   public static final int BOOTP = 9;
 
+  private final int state;
+
+  public LeaseState(int state) {
+    this.state = state;
+  }
+
+  public int getState() {
+    return this.state;
+  }
+
+  public static String nameForValue(LeaseState leaseState) {
+    return LeaseState.nameForValue(leaseState.getState());
+  }
 
   public static String nameForValue(int value) {
     String result = "unknown";
@@ -45,6 +62,20 @@ public class LeaseState {
         break;
       default:
         break;
+    }
+
+    return result;
+  }
+
+  @Override
+  public int compareTo(LeaseState o) {
+    int result = 0;
+    int oState = o.getState();
+
+    if (oState < this.state) {
+      result = -1;
+    } else if (oState > this.state) {
+      result = 1;
     }
 
     return result;

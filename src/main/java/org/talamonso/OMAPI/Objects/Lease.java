@@ -50,17 +50,17 @@ public class Lease extends Message {
    */
   public void delete() throws OmapiException {
     Lease expire = this.send(MessageType.OPEN);
-    expire.updateState(LeaseState.FREE);
+    expire.updateState(new LeaseState(LeaseState.FREE));
     expire.send(MessageType.UPDATE);
   }
 
   /**
    * update the leases state.
    * 
-   * @param value
+   * @param state
    */
-  public void updateState(int value) {
-    this.updateObjectAsInt("state", value);
+  public void updateState(LeaseState state) {
+    this.updateObjectAsInt("state", state.getState());
   }
 
   /**
@@ -192,7 +192,9 @@ public class Lease extends Message {
    * @throws OmapiInitException
    */
   public Lease send(int action) throws OmapiException {
-    return new Lease(this.connection, this.sendMessage(action));
+    return new Lease(
+      this.connection, this.sendMessage(new MessageType(action))
+    );
   }
 
   /**

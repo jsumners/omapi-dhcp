@@ -145,8 +145,8 @@ public abstract class Message {
     // We first need to have a handle!
     new EmptyMessage(
       this.connection,
-      this.sendMessage(MessageType.OPEN)
-    ).sendMessage(MessageType.DEL);
+      this.sendMessage(new MessageType(MessageType.OPEN))
+    ).sendMessage(new MessageType(MessageType.DEL));
   }
 
   /**
@@ -161,7 +161,10 @@ public abstract class Message {
   public Message getMessageViaHandle(int h) throws OmapiException {
     Message x = new EmptyMessage(this.connection);
     x.handle = Convert.intTo4ByteArray(h);
-    x = new EmptyMessage(this.connection, x.sendMessage(MessageType.REFRESH));
+    x = new EmptyMessage(
+      this.connection,
+      x.sendMessage(new MessageType(MessageType.REFRESH))
+    );
     return x;
   }
 
@@ -587,25 +590,31 @@ public abstract class Message {
   }
 
   /**
-   * Commits the Data to the server and returns the byteArray from the answer
-   * <p>
-   * There are severall options for the parameter action. Use this constantes!
-   * </p>
-   * Message.OPEN<br/> Message.REFRESH<br/> Message.UPDATE<br/> Message.CREATE<br/>
-   * </p>
+   * <p>Commits the Data to the server and returns the byteArray from the
+   * answer.</p>
+   *
+   * <p>There are severall options for the parameter action.
+   * Use these constants:</p>
+   *
+   * <ul>
+   *   <li>{@link org.talamonso.OMAPI.MessageType#OPEN}</li>
+   *   <li>{@link org.talamonso.OMAPI.MessageType#REFRESH}</li>
+   *   <li>{@link org.talamonso.OMAPI.MessageType#UPDATE}</li>
+   *   <li>{@link org.talamonso.OMAPI.MessageType#CREATE}</li>
+   * </ul>
    * 
-   * @param action shown above
+   * @param messageType shown above
    * @return the answer of the server as a ByteArray
    * @throws OmapiConnectionException if the connection fails
    * @throws OmapiInitException if the initialisation fails
    * @throws OmapiObjectException if the Object has an error
    */
-  protected byte[] sendMessage(int action) throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(action);
+  protected byte[] sendMessage(MessageType messageType) throws OmapiException {
+    this.opcode = Convert.intTo4ByteArray(messageType.getType());
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
 
-    switch (action) {
+    switch (messageType.getType()) {
       case MessageType.DEL:
       case MessageType.REFRESH:
         // We don't need to have the payload for DELETE and REFRESH
@@ -624,12 +633,12 @@ public abstract class Message {
       case MessageType.UPDATE:
         EmptyMessage in = new EmptyMessage(
           this.connection,
-          this.sendMessage(MessageType.OPEN)
+          this.sendMessage(new MessageType(MessageType.OPEN))
         );
         in.obj = this.upd_obj;
-        in.sendMessage(MessageType.UPD);
+        in.sendMessage(new MessageType(MessageType.UPD));
         // FIXME: I don't like this return. ~ jsumners
-        return in.sendMessage(MessageType.REFRESH);
+        return in.sendMessage(new MessageType(MessageType.REFRESH));
         //break;
 
       case MessageType.OPEN:
@@ -640,7 +649,7 @@ public abstract class Message {
         throw new OmapiConnectionException("Unknown command");
     }
 
-    return this.commit(action);
+    return this.commit(messageType.getType());
   }
 
   /**

@@ -8,6 +8,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 
 import com.widget.util.Hex;
+import org.talamonso.OMAPI.MessageType;
 
 /**
  * Host Object Class.
@@ -107,7 +108,10 @@ public class Host extends Message {
    * @throws OmapiConnectionException is thrown if connection fails
    */
   public Host send(int option) throws OmapiException {
-    return new Host(this.connection, super.sendMessage(option));
+    return new Host(
+      this.connection,
+      super.sendMessage(new MessageType(option))
+    );
   }
 
   /**

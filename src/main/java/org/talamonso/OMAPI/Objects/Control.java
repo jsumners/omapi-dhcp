@@ -49,7 +49,10 @@ public class Control extends Message {
    * @throws OmapiConnectionException
    */
   public Control send(int option) throws OmapiException {
-    return new Control(this.connection, super.sendMessage(option));
+    return new Control(
+      this.connection,
+      super.sendMessage(new MessageType(option))
+    );
   }
 
   /**

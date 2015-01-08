@@ -6,6 +6,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
+import org.talamonso.OMAPI.MessageType;
 
 /**
  * FailoverState class
@@ -237,7 +238,10 @@ public class FailoverState extends Message {
    * @throws OmapiConnectionException
    */
   public FailoverState send(int option) throws OmapiException {
-    return new FailoverState(this.connection, super.sendMessage(option));
+    return new FailoverState(
+      this.connection,
+      super.sendMessage(new MessageType(option))
+    );
   }
 
   /**

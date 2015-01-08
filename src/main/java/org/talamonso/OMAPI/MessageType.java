@@ -1,6 +1,10 @@
 package org.talamonso.OMAPI;
 
-public class MessageType {
+import java.io.Serializable;
+
+public class MessageType implements Comparable<MessageType>, Serializable {
+  private static final long serialVersionUID = 1L;
+
   public static final int OPEN = 1;
   public static final int REFRESH = 2;
   public static final int UPD = 3;
@@ -10,6 +14,20 @@ public class MessageType {
   public static final int CREATE = 7;
   public static final int DELETE = 8;
   public static final int UPDATE = 9;
+
+  private final int type;
+
+  public MessageType(int type) {
+    this.type = type;
+  }
+
+  public int getType() {
+    return this.type;
+  }
+
+  public static String nameForType(MessageType messageType) {
+    return MessageType.nameForValue(messageType.getType());
+  }
 
   public static String nameForValue(int value) {
     String result = "unknown";
@@ -38,6 +56,20 @@ public class MessageType {
         break;
       default:
         break;
+    }
+
+    return result;
+  }
+
+  @Override
+  public int compareTo(MessageType o) {
+    int result = 0;
+    int oType = o.getType();
+
+    if (oType < this.type) {
+      result = -1;
+    } else if (oType > this.type) {
+      result = 1;
     }
 
     return result;
