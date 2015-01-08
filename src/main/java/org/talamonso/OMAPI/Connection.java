@@ -40,19 +40,6 @@ public class Connection {
   private final int version = 100;
 
   /**
-   * Sets the debug level.
-   * <p>
-   * Debug informations are sent to System.err console.
-   * <p>
-   * 0 delivers no informations.<br>
-   * 1 delivers core informations.<br>
-   * 2 delivers in addition more detailed information.<br>
-   * 3 delivers in addition very detailed information.<br>
-   * </p>
-   */
-  protected int debuglevel = 0;
-
-  /**
    * InputStream of the connection
    */
   protected InputStream in;
@@ -207,22 +194,6 @@ public class Connection {
     bb.put(Convert.intTo4ByteArray(this.version));
     bb.put(Convert.intTo4ByteArray(this.headerlength));
     return bb.array();
-  }
-
-  /**
-   * Method for log entries.
-   * 
-   * @param msg Message to log
-   * @param level importance of the entry
-   */
-  protected void log(String msg, int level) {
-    System.err.flush();
-    System.out.flush();
-    if (this.debuglevel >= level) {
-      System.err.println(msg);
-    }
-    System.out.flush();
-    System.err.flush();
   }
 
   /**
