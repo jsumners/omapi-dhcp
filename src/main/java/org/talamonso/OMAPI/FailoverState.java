@@ -16,7 +16,7 @@ public class FailoverState implements Comparable<FailoverState>, Serializable {
   public static final int RECOVER_DONE_VALUE = 9;
   public static final int RESOLUTION_INTERRUPTED_VALUE = 10;
   public static final int CONFLICT_DONE_VALUE = 11;
-  public static final int RECOVER_WAIT_VALUE = 12;
+  public static final int RECOVER_WAIT_VALUE = 254;
 
   public static final FailoverState STARTUP;
   public static final FailoverState NORMAL;
