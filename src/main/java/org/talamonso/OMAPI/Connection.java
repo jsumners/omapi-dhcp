@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Base64;
 
 import com.widget.util.Hex;
 import org.slf4j.Logger;
@@ -128,7 +129,7 @@ public class Connection {
         throw new OmapiInitException("Name of the Key exceeds 16 byte");
       }
       this.keyName = name;
-      this.key = new sun.misc.BASE64Decoder().decodeBuffer(k);
+      this.key = Base64.getDecoder().decode(k);
       Authenticator a = new Authenticator(this, name);
       a.send(MessageType.OPEN);
       this.useAuth = true;
