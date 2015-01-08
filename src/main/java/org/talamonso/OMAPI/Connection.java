@@ -8,7 +8,8 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 
-import com.widget.util.Hex;
+import com.google.common.io.BaseEncoding;
+import com.jrfom.util.HexFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
@@ -22,6 +23,8 @@ import org.talamonso.OMAPI.Objects.Authenticator;
  */
 public class Connection {
   private static final Logger log = LoggerFactory.getLogger(Connection.class);
+
+  private final BaseEncoding hex = BaseEncoding.base16();
 
   private final int headerlength = 24;
 
@@ -74,25 +77,31 @@ public class Connection {
    * Connects to a DHCP server.
    * 
    * @param server For example host.tld or 192.168.1.254
-   * @param portnr For example 7911
+   * @param port For example 7911
    * @throws OmapiConnectionException if connection fails.
    */
-  public Connection(String server, int portnr) throws OmapiConnectionException {
-    log.debug("Trying to Connect to: `{}:{}`", server, portnr);
+  public Connection(String server, int port) throws OmapiConnectionException {
+    log.debug("Trying to Connect to: `{}:{}`", server, port);
     try {
       this.host = InetAddress.getByName(server);
-      this.port = portnr;
-      this.socket = new Socket(this.host, portnr);
+      this.port = port;
+      this.socket = new Socket(this.host, port);
       this.in = this.socket.getInputStream();
       this.out = this.socket.getOutputStream();
+
       byte[] b = new byte[8];
       while ((this.in.read(b)) != -1) {
         break;
       }
-      if (!Hex.toHex(b).equals(Hex.toHex(this.initValue()))) {
-        throw new OmapiConnectionException("unknown server version: " + Hex.toHex(b));
+
+      String bHex = this.hex.encode(b);
+      String tHex = this.hex.encode(this.initValue());
+      if (!bHex.equals(tHex)) {
+        log.error("Unknown server version: `{}`", bHex);
+        throw new OmapiConnectionException("unknown server version: " + bHex);
       }
     } catch (IOException e) {
+      log.error("Could not establish a connection: `{}`", e.getMessage());
       throw new OmapiConnectionException(e.getMessage());
     }
     log.debug(" - Connection established");
@@ -108,9 +117,7 @@ public class Connection {
       this.out.close();
       this.socket.close();
     } catch (IOException e) {
-      // an error?
-      // this could only happen,
-      // if the connection is already closed!
+      log.error("Connection is already closed: `{}`", e.getMessage());
     }
     log.debug(" - Connection successfully closed");
   }
@@ -118,26 +125,25 @@ public class Connection {
   /**
    * Sets the parameters used for the authentication and commits it to the server.
    * 
-   * @param name Name of the secred key as in dhcpd.conf
+   * @param name Name of the secret key as in dhcpd.conf
    * @param k Secret key in Base64 as in dhcpd.conf
    * @throws OmapiInitException
    */
   public void setAuth(String name, String k) throws OmapiInitException {
     log.debug("Trying to set the authenticator");
     try {
-      if (name.length() > 16) {
-        throw new OmapiInitException("Name of the Key exceeds 16 byte");
-      }
       this.keyName = name;
       this.key = Base64.getDecoder().decode(k);
+      this.useAuth = true;
+
       Authenticator a = new Authenticator(this, name);
       a.send(MessageType.OPEN);
-      this.useAuth = true;
     } catch (Exception e) {
       this.key = null;
       this.useAuth = false;
       this.keyName = "";
-      throw new OmapiInitException("Key is no valid Base64\n" + e.getMessage());
+      log.error("Could not authenticate: `{}`", e.getMessage());
+      throw new OmapiInitException("Could not authenticate:\n" + e.getMessage());
     }
     log.debug(" - Authenticator successfully set");
   }
@@ -160,7 +166,7 @@ public class Connection {
     sb.append("Use Authentification:    " + this.useAuth + "\n");
     if (this.useAuth) {
       sb.append(" Key Name:               " + this.keyName + "\n");
-      sb.append(" Secret Key:            " + Hex.toHexF(this.key));
+      sb.append(" Secret Key:            " + HexFormatter.withSpaces(this.key));
     }
 
     return sb.toString();
