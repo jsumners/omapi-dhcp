@@ -1,6 +1,7 @@
 package org.talamonso.OMAPI.Objects;
 
 import org.talamonso.OMAPI.Connection;
+import org.talamonso.OMAPI.LeaseState;
 import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
@@ -17,8 +18,6 @@ import org.talamonso.OMAPI.MessageType;
  */
 public class Lease extends Message {
 
-  private final int FREE = 1;
-
   /**
    * Constructor for a Lease Object. Requires an OMAPI Connection.
    * 
@@ -32,7 +31,7 @@ public class Lease extends Message {
   /**
    * Constructor for the received Lease Object
    * 
-   * @param c connection to OMAPI Server
+   * @param con connection to OMAPI Server
    * @param b ByteArray of the InputStream
    * @throws OmapiObjectException
    */
@@ -41,7 +40,9 @@ public class Lease extends Message {
   }
 
   /**
-   * We need to override the default method... Because we need to set it free... Because we can't delete leases...
+   * We need to override the default method...
+   * Because we need to set it free...
+   * Because we can't delete leases...
    * 
    * @throws OmapiConnectionException
    * @throws OmapiInitException
@@ -49,7 +50,7 @@ public class Lease extends Message {
    */
   public void delete() throws OmapiException {
     Lease expire = this.send(MessageType.OPEN);
-    expire.updateState(this.FREE);
+    expire.updateState(LeaseState.FREE);
     expire.send(MessageType.UPDATE);
   }
 
@@ -147,7 +148,7 @@ public class Lease extends Message {
   /**
    * readable representation of the MAC-Address
    * 
-   * @return MAC address as a ":"-seperated Hex String (e.g. aa:aa:aa:aa:aa:aa)
+   * @return MAC address as a ":"-separated Hex String (e.g. aa:aa:aa:aa:aa:aa)
    */
   public String getHardwareAddress() {
     return this.getObjectAsMacAddress("hardware-address");
