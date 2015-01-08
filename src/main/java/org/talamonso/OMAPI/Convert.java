@@ -4,8 +4,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.StringTokenizer;
 
+import com.google.common.collect.Range;
+import com.google.common.net.InetAddresses;
 import com.widget.util.Hex;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 
@@ -77,8 +78,8 @@ public final class Convert {
    * @return String representation of the ip address
    */
   protected static String hex2ip(byte[] b) {
-    StringBuffer sb = new StringBuffer();
     if (b != null) {
+      StringBuilder sb = new StringBuilder();
       sb.append((b[0] & 0xFF) + ".");
       sb.append((b[1] & 0xFF) + ".");
       sb.append((b[2] & 0xFF) + ".");
@@ -95,8 +96,8 @@ public final class Convert {
    * @return String representation of the mac address
    */
   protected static String hex2mac(byte[] b) {
-    StringBuffer sb = new StringBuffer();
     if (b != null) {
+      StringBuilder sb = new StringBuilder();
       for (int i = 0; i < b.length; i++) {
         sb.append(Hex.toHex(b[i]));
         if (i + 1 < b.length) {
@@ -156,19 +157,20 @@ public final class Convert {
    * @throws OmapiObjectException is thrown if the ip address is not a valid one.
    */
   protected static byte[] ip2hex(String strIPAddress) throws OmapiObjectException {
-    String regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-    if (!strIPAddress.matches(regex)) {
+    if (!InetAddresses.isInetAddress(strIPAddress)) {
       throw new OmapiObjectException("invalid ip address.");
     }
-    StringTokenizer kStringTokenizer = new StringTokenizer(strIPAddress, ".");
+
+    String[] parts = strIPAddress.split(".");
+    Range<Integer> range = Range.closed(0, 255);
     byte[] hex = new byte[4];
-    for (int i = 0; kStringTokenizer.hasMoreTokens(); i++) {
-      String strCurrentToken = kStringTokenizer.nextToken();
-      int iCurrentToken = Integer.parseInt(strCurrentToken);
-      if ((iCurrentToken >= 0) && (iCurrentToken < 256)) {
-        hex[i] = (byte) iCurrentToken;
+    for (int i = 0, j = parts.length; i < j; i += 1) {
+      int octet = Integer.parseInt(parts[i], 10);
+      if ( range.contains(octet) ) {
+        hex[i] = (byte) octet;
       }
     }
+
     return hex;
   }
 
@@ -180,7 +182,7 @@ public final class Convert {
    * @throws OmapiObjectException is thrown ifMAC address is not in the expected format
    */
   protected static byte[] mac2hex(String mac) throws OmapiObjectException {
-    if (mac.matches("^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$")) {
+    if (mac.matches("^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$")) {
       return Hex.toByteArr(mac.replaceAll(":", ""));
     }
     throw new OmapiObjectException("Illegal MAC Address: " + mac);
@@ -212,15 +214,15 @@ public final class Convert {
    * @throws OmapiObjectException
    */
   public static long ip2long(String IP) throws OmapiObjectException {
-    String regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-    if (!IP.matches(regex)) {
+    if (!InetAddresses.isInetAddress(IP)) {
       throw new OmapiObjectException("invalid ip address.");
     }
-    String Segment[] = IP.split("\\.");
-    long S0 = (long) (Integer.valueOf(Segment[0]).doubleValue() * Math.pow(256, 3));
-    long S1 = (long) (Integer.valueOf(Segment[1]).doubleValue() * Math.pow(256, 2));
-    long S2 = (long) (Integer.valueOf(Segment[2]).doubleValue() * Math.pow(256, 1));
-    long S3 = (long) (Integer.valueOf(Segment[3]).doubleValue() * Math.pow(256, 0));
+
+    String[] octets = IP.split("\\.");
+    long S0 = (long) (Integer.valueOf(octets[0]).doubleValue() * Math.pow(256, 3));
+    long S1 = (long) (Integer.valueOf(octets[1]).doubleValue() * Math.pow(256, 2));
+    long S2 = (long) (Integer.valueOf(octets[2]).doubleValue() * Math.pow(256, 1));
+    long S3 = (long) (Integer.valueOf(octets[3]).doubleValue() * Math.pow(256, 0));
     long base10 = S0 + S1 + S2 + S3;
     return base10;
   }
