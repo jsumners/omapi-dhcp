@@ -160,7 +160,8 @@ public class Connection {
    * @return Connection details
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
+
     sb.append("OMAPI Connection Informations:\n");
     sb.append("===============================\n");
     sb.append("Server address:          " + this.host.getHostAddress() + "\n");
@@ -173,6 +174,7 @@ public class Connection {
       sb.append(" Key Name:               " + this.keyName + "\n");
       sb.append(" Secret Key:            " + Hex.toHexF(this.key));
     }
+    
     return sb.toString();
   }
 
