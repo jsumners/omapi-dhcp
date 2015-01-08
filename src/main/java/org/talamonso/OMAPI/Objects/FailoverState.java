@@ -237,7 +237,7 @@ public class FailoverState extends Message {
    * @throws OmapiConnectionException
    */
   public FailoverState send(int option) throws OmapiException {
-    return new FailoverState(this.c, super.sendMessage(option));
+    return new FailoverState(this.connection, super.sendMessage(option));
   }
 
   /**
@@ -264,7 +264,8 @@ public class FailoverState extends Message {
    * @return details of this Objects
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
+
     sb.append("This is an FailoverPair Object\n");
     sb.append("Name:                    " + this.getName() + "\n");
     sb.append("Partner address:         " + this.getPartnerAddress() + ":" + this.getPartnerPort() + "\n");
@@ -283,6 +284,7 @@ public class FailoverState extends Message {
     sb.append("Clock Skew:              " + this.getSkew() + "\n");
     sb.append("Max response delay:      " + this.getMaxResponseDelay() + "\n");
     sb.append("Cur. unacked updates:    " + this.getCurUnackedUpdated() + "\n");
+
     return sb.toString();
   }
 }

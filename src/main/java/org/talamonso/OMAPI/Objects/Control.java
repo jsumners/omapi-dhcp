@@ -1,11 +1,13 @@
 package org.talamonso.OMAPI.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talamonso.OMAPI.Connection;
-import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
+import org.talamonso.OMAPI.Message;
 
 /**
  * Control object class.
@@ -13,6 +15,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
  * @author Talamonso
  */
 public class Control extends Message {
+  private static final Logger log = LoggerFactory.getLogger(Control.class);
 
   /**
    * Constructor for a control object. Requires an OMAPI Connection.
@@ -45,7 +48,7 @@ public class Control extends Message {
    * @throws OmapiConnectionException
    */
   public Control send(int option) throws OmapiException {
-    return new Control(this.c, super.sendMessage(option));
+    return new Control(this.connection, super.sendMessage(option));
   }
 
   /**
@@ -66,14 +69,10 @@ public class Control extends Message {
    * @return details of this Objects
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append("This is an Control Object\n");
-    System.out.print("Server is: ");
-    if (this.getObjectAsInt("state") == 0) {
-      System.out.println("up and running");
-    } else {
-      System.out.println("going down");
-    }
-    return sb.toString();
+    String state =  (this.getObjectAsInt("state") == 0) ?
+      "up and running" : "going down";
+    log.debug("Server is: {}", state);
+
+    return "This is a Control object";
   }
 }

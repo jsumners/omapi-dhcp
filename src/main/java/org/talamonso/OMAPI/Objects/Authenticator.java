@@ -50,6 +50,6 @@ public class Authenticator extends Message {
    * @throws OmapiInitException
    */
   public Authenticator send(int option) throws OmapiException {
-    return new Authenticator(this.c, this.sendMessage(option));
+    return new Authenticator(this.connection, this.sendMessage(option));
   }
 }

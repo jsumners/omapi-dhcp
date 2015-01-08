@@ -48,7 +48,7 @@ public class Subnet extends Message {
     long now = start;
     while (now < end) {
       long count = now - start;
-      la[(int) count] = new Lease(this.c);
+      la[(int) count] = new Lease(this.connection);
       try {
         la[(int) count].setIPAddress(Convert.long2ip(now));
         la[(int) count] = la[(int) count].send(Message.OPEN);

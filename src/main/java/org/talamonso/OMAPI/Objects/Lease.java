@@ -190,7 +190,7 @@ public class Lease extends Message {
    * @throws OmapiInitException
    */
   public Lease send(int action) throws OmapiException {
-    return new Lease(this.c, this.sendMessage(action));
+    return new Lease(this.connection, this.sendMessage(action));
   }
 
   /**
@@ -222,7 +222,9 @@ public class Lease extends Message {
     if (this.getState() != 2) {
       return "The lease " + this.getIpAddress() + " is free";
     }
-    StringBuffer sb = new StringBuffer();
+
+    StringBuilder sb = new StringBuilder();
+
     sb.append("This is an lease object\n");
     sb.append("State:             " + this.getState() + "\n");
     sb.append("IP-Address:        " + this.getIpAddress() + "\n");
@@ -238,6 +240,7 @@ public class Lease extends Message {
     sb.append("Host (handle!):    " + this.getHost() + "\n");
     sb.append("Subnet (handle!):  " + this.getSubnet() + "\n");
     sb.append("Pool (handle!):    " + this.getPool() + "\n");
+
     return sb.toString();
   }
 }

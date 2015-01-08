@@ -107,7 +107,7 @@ public class Host extends Message {
    * @throws OmapiConnectionException is thrown if connection fails
    */
   public Host send(int option) throws OmapiException {
-    return new Host(this.c, super.sendMessage(option));
+    return new Host(this.connection, super.sendMessage(option));
   }
 
   /**
@@ -153,7 +153,8 @@ public class Host extends Message {
    * @return This Object as readable String
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
+
     sb.append("This is an Host Object\n");
     sb.append("Name:          " + this.getName() + "\n");
     sb.append("Identifier:    " + this.getDhcpClientIdentifier() + "\n");
@@ -162,6 +163,7 @@ public class Host extends Message {
     sb.append("Hardware-Type: " + this.getHardwareType() + "\n");
     sb.append("Group:         " + this.getGroup() + "\n");
     sb.append("known:         " + this.getKnown() + "\n");
+
     return sb.toString();
   }
 

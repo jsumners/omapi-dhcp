@@ -7,11 +7,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import com.widget.util.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Objects.Authenticator;
-
-import com.widget.util.Hex;
 
 /**
  * A class which implements the Interface for object manipulation (OMAPI). <p> This interface is important if you want to change the ISC DHCP server while its running. </p>
@@ -19,6 +20,7 @@ import com.widget.util.Hex;
  * @version  1.0
  */
 public class Connection {
+  private static final Logger log = LoggerFactory.getLogger(Connection.class);
 
   private final int headerlength = 24;
 
@@ -88,7 +90,7 @@ public class Connection {
    * @throws OmapiConnectionException if connection fails.
    */
   public Connection(String server, int portnr) throws OmapiConnectionException {
-    this.log("Trying to Connect to: \"" + server + ":" + portnr + "\".", 1);
+    log.debug("Trying to Connect to: `{}:{}`", server, portnr);
     try {
       this.host = InetAddress.getByName(server);
       this.port = portnr;
@@ -105,14 +107,14 @@ public class Connection {
     } catch (IOException e) {
       throw new OmapiConnectionException(e.getMessage());
     }
-    this.log(" - Connection established.", 1);
+    log.debug(" - Connection established");
   }
 
   /**
    * Shut down this connection.
    */
   public void close() {
-    this.log("Trying to close the connection.", 1);
+    log.debug("Trying to close the connection");
     try {
       this.in.close();
       this.out.close();
@@ -122,7 +124,7 @@ public class Connection {
       // this could only happen,
       // if the connection is already closed!
     }
-    this.log(" - Connection successfully closed.", 1);
+    log.debug(" - Connection successfully closed");
   }
 
   /**
@@ -133,7 +135,7 @@ public class Connection {
    * @throws OmapiInitException
    */
   public void setAuth(String name, String k) throws OmapiInitException {
-    this.log("Trying to set the authenticator.", 2);
+    log.debug("Trying to set the authenticator");
     try {
       if (name.length() > 16) {
         throw new OmapiInitException("Name of the Key exceeds 16 byte");
@@ -149,7 +151,7 @@ public class Connection {
       this.keyName = "";
       throw new OmapiInitException("Key is no valid Base64\n" + e.getMessage());
     }
-    this.log(" - Authenticator successfully set.", 2);
+    log.debug(" - Authenticator successfully set");
   }
 
   /**

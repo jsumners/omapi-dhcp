@@ -2,20 +2,16 @@ package org.talamonso.OMAPI;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.talamonso.OMAPI.Exceptions.OmapiCallException;
-import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
-import org.talamonso.OMAPI.Exceptions.OmapiException;
-import org.talamonso.OMAPI.Exceptions.OmapiInitException;
-import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-import org.xbill.DNS.utils.HMAC;
-
 import com.widget.util.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.talamonso.OMAPI.Exceptions.*;
+import org.xbill.DNS.utils.HMAC;
 
 /**
  * This abstract class contains the main functions for the communication. It also validates and signs the Messages.
@@ -23,6 +19,7 @@ import com.widget.util.Hex;
  * @version   1.0
  */
 public abstract class Message {
+  private static final Logger log = LoggerFactory.getLogger(Message.class);
 
   /**
    * indicates a create Message
@@ -113,7 +110,7 @@ public abstract class Message {
   /**
    * Stores the whole Connection informations needed for the communication
    */
-  protected Connection c;
+  protected Connection connection;
 
   /**
    * Saves the object keys and values.
@@ -126,8 +123,8 @@ public abstract class Message {
    * @param con Connection to the OMAPI Server
    */
   protected Message(Connection con) {
-    con.log("Creating emtpy Message Object", 2);
-    this.c = con;
+    log.debug("Creating emtpy Message object");
+    this.connection = con;
     if (con.useAuth) {
       this.authid = Convert.intTo4ByteArray(1);
       this.authlen = Convert.intTo4ByteArray(16);
@@ -142,8 +139,8 @@ public abstract class Message {
    * @throws OmapiObjectException if the construction fails
    */
   protected Message(Connection con, byte[] m) throws OmapiException {
-    con.log("Effort to assign incoming data to Message Object", 2);
-    this.c = con;
+    log.debug("Attempting to assign incoming data to Message object");
+    this.connection = con;
     if (m.length < 24 + 4 + 16) {
       throw new OmapiObjectException("Sorry. Incoming Message too small.");
     }
@@ -185,7 +182,7 @@ public abstract class Message {
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
     // We first need to have a handle!
-    new EmptyMessage(this.c, this.sendMessage(Message.OPEN)).sendMessage(Message.DEL);
+    new EmptyMessage(this.connection, this.sendMessage(Message.OPEN)).sendMessage(Message.DEL);
   }
 
   /**
@@ -198,9 +195,9 @@ public abstract class Message {
    * @throws OmapiConnectionException
    */
   public Message getMessageViaHandle(int h) throws OmapiException {
-    Message x = new EmptyMessage(this.c);
+    Message x = new EmptyMessage(this.connection);
     x.handle = Convert.intTo4ByteArray(h);
-    x = new EmptyMessage(this.c, x.sendMessage(Message.REFRESH));
+    x = new EmptyMessage(this.connection, x.sendMessage(Message.REFRESH));
     return x;
   }
 
@@ -210,7 +207,7 @@ public abstract class Message {
    * @return This Message Object as a readable String
    */
   public String toStringAll() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("\nMessage:  " + "\n");
     sb.append("=========\n");
     sb.append("Header" + "\n");
@@ -229,23 +226,33 @@ public abstract class Message {
   /**
    * Add an key - value pair to the Msg payload.
    * 
-   * @param Key eg. type
-   * @param Value as an bytearray
+   * @param key eg. type
+   * @param value as an bytearray
    */
-  private void addMsg(String Key, byte[] Value) {
-    this.msg.put(Key, Value);
-    this.c.log(this.getClass().getName() + " extended with Message \n " + Key + "\n " + Hex.toHexF(Value) + "\n", 3);
+  private void addMsg(String key, byte[] value) {
+    this.msg.put(key, value);
+    log.trace(
+      "{} extended with Message: `{key: '{}', value: '{}'}`",
+      this.getClass().getName(),
+      key,
+      Hex.toHexF(value)
+    );
   }
 
   /**
    * Add an key - value pair to the Obj payload.
    * 
-   * @param Key eg. ip-address
-   * @param Value as an bytearray
+   * @param key eg. ip-address
+   * @param value as an bytearray
    */
-  private void addObj(String Key, byte[] Value) {
-    this.obj.put(Key, Value);
-    this.c.log(this.getClass().getName() + " extended with attribute \n " + Key + "\n " + Hex.toHexF(Value) + "\n", 3);
+  private void addObj(String key, byte[] value) {
+    this.obj.put(key, value);
+    log.trace(
+      "{} extended with attribute: `{key: '{}', value: '{}}`",
+      this.getClass().getName(),
+      key,
+      Hex.toHexF(value)
+    );
   }
 
   /**
@@ -307,7 +314,7 @@ public abstract class Message {
     bb.put(this.tid);
     bb.put(this.rid);
     bb.put(this.getPayload());
-    HMAC hmac = new HMAC("md5", this.c.getKey());
+    HMAC hmac = new HMAC("md5", this.connection.getKey());
     hmac.update(bb.array());
     return Hex.toHex(hmac.sign()).equals(Hex.toHex(this.signature));
   }
@@ -320,20 +327,30 @@ public abstract class Message {
    * @throws OmapiConnectionException is thrown if Server connection failes
    */
   private byte[] commit(int action) throws OmapiConnectionException {
-    this.c.log("Trying to " + this.decodeAction(action) + " " + this.getClass().getName(), 2);
+    log.debug(
+      "Trying to {} {}",
+      this.decodeAction(action),
+      this.getClass().getName()
+    );
+
     try {
-      this.c.out.write(this.toByteArray());
-      this.c.out.flush();
+      this.connection.out.write(this.toByteArray());
+      this.connection.out.flush();
       byte[] b = new byte[1024];
-      int count = (this.c.in.read(b));
+      int count = (this.connection.in.read(b));
       ByteBuffer bb = ByteBuffer.allocate(count);
       bb.put(b, 0, count);
       this.answer = bb.array();
     } catch (IOException e) {
       throw new OmapiConnectionException(e.getMessage());
     }
-    this.c.updateInit();
-    this.c.log(" - Successfully " + this.decodeAction(action) + "ed ...", 2);
+
+    this.connection.updateInit();
+    log.debug(
+      " - Successfully {}ed ...",
+      this.decodeAction(action)
+    );
+
     return this.answer;
   }
 
@@ -343,7 +360,7 @@ public abstract class Message {
    * @return the decoded Message
    */
   private String decodePayload() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     Iterator it;
     sb.append(" Message:\n");
     it = this.msg.entrySet().iterator();
@@ -441,7 +458,7 @@ public abstract class Message {
     bb.put(this.tid);
     bb.put(this.rid);
     bb.put(this.getPayload());
-    HMAC hmac = new HMAC("md5", this.c.getKey());
+    HMAC hmac = new HMAC("md5", this.connection.getKey());
     hmac.update(bb.array());
     return hmac.sign();
   }
@@ -452,16 +469,16 @@ public abstract class Message {
    * @return ByteArray representing this Message object
    */
   private byte[] toByteArray() {
-    int hl = this.c.getHeaderLength();
+    int hl = this.connection.getHeaderLength();
     int pll = this.getPayload().length;
     int al = Convert.byteArrayToInt(this.authlen);
     int size = hl + pll + al;
-    if (!this.c.init) {
+    if (!this.connection.init) {
       size = size + 8;
     }
     ByteBuffer bb = ByteBuffer.allocate(size);
-    if (!this.c.init) {
-      bb.put(this.c.initValue());
+    if (!this.connection.init) {
+      bb.put(this.connection.initValue());
     }
     bb.put(this.authid);
     bb.put(this.authlen);
@@ -470,15 +487,19 @@ public abstract class Message {
     bb.put(this.tid);
     bb.put(this.rid);
     bb.put(this.getPayload());
-    if (this.c.useAuth == true) {
+    if (this.connection.useAuth) {
       bb.put(this.signMsg());
     }
     return bb.array();
   }
 
-  private void updObj(String Key, byte[] Value) {
-    this.upd_obj.put(Key, Value);
-    this.c.log(this.getClass().getName() + " updated attribute with \n " + Key + "\n " + Hex.toHexF(Value) + "\n", 3);
+  private void updObj(String key, byte[] value) {
+    this.upd_obj.put(key, value);
+    log.trace(
+      "{} updated attribute with: `{key: '{}', value: '{}'}`",
+      this.getClass().getName(),
+      Hex.toHexF(value)
+    );
   }
 
   /**
@@ -488,23 +509,35 @@ public abstract class Message {
    * @return String representating the action code
    */
   protected String decodeAction(int action) {
-    if (action == 1) {
-      return "OPEN";
-    } else if (action == 2) {
-      return "REFRESH";
-    } else if (action == 3) {
-      return "UPDATE";
-    } else if (action == 4) {
-      return "NOTIFY";
-    } else if (action == 5) {
-      return "ERROR";
-    } else if (action == 6) {
-      return "DELETE";
-    } else if (action == 7) {
-      return "CREATE";
-    } else {
-      return "unknown";
+    String result = "unknown";
+
+    switch (action) {
+      case 1: // this.OPEN
+        result = "OPEN";
+        break;
+      case 2: // this.REFRESH
+        result = "REFRESH";
+        break;
+      case 3: // this.UPDATE
+        result = "UPDATE";
+        break;
+      case 4: // this.NOTIFY
+        result = "NOTIFY";
+        break;
+      case 5: // this.ERROR
+        result = "ERROR";
+        break;
+      case 6: // this.DELETE
+        result = "DELETE";
+        break;
+      case 7: // this.CREATE
+        result = "CREATE";
+        break;
+      default:
+        break;
     }
+
+    return result;
   }
 
   /**
@@ -570,7 +603,7 @@ public abstract class Message {
     if (b == null || b.length % 4 != 0) {
       return "";
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     ByteBuffer bb = ByteBuffer.wrap(b);
     byte[] x = new byte[4];
     while (bb.position() < bb.limit()) {
@@ -662,7 +695,7 @@ public abstract class Message {
     }
       break;
     case UPDATE: {
-      EmptyMessage in = new EmptyMessage(this.c, this.sendMessage(Message.OPEN));
+      EmptyMessage in = new EmptyMessage(this.connection, this.sendMessage(Message.OPEN));
       in.obj = this.upd_obj;
       in.sendMessage(Message.UPD);
       return in.sendMessage(Message.REFRESH);

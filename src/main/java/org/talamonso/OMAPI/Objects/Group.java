@@ -77,7 +77,7 @@ public class Group extends Message {
    * @throws OmapiInitException
    */
   public Group send(int option) throws OmapiException {
-    return new Group(this.c, super.sendMessage(option));
+    return new Group(this.connection, super.sendMessage(option));
   }
 
   /**
@@ -86,8 +86,8 @@ public class Group extends Message {
    * @return details of this Objects
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append("This is an group object\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append("This is a Group object\n");
     sb.append("group name:     " + this.getName() + "\n");
     return sb.toString();
   }

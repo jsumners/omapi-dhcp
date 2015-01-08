@@ -85,8 +85,7 @@ public enum ErrorCode
   private final int m_Number;
   private final String m_Meaning;
 
-  private static final Map<Integer, ErrorCode> s_InternalMap =
-    new HashMap<Integer, ErrorCode>();
+  private static final Map<Integer, ErrorCode> s_InternalMap = new HashMap<>();
   
   static
   {
