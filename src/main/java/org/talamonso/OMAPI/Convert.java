@@ -161,7 +161,7 @@ public final class Convert {
       throw new OmapiObjectException("invalid ip address.");
     }
 
-    String[] parts = strIPAddress.split(".");
+    String[] parts = strIPAddress.split("\\.");
     Range<Integer> range = Range.closed(0, 255);
     byte[] hex = new byte[4];
     for (int i = 0, j = parts.length; i < j; i += 1) {

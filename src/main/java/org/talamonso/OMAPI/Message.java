@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.common.io.BaseEncoding;
+import com.jrfom.util.HexFormatter;
 import com.widget.util.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,8 @@ import org.xbill.DNS.utils.HMAC;
  */
 public abstract class Message {
   private static final Logger log = LoggerFactory.getLogger(Message.class);
+
+  private final BaseEncoding hex = BaseEncoding.base16();
 
   /**
    * The Answer of the dhcp server. Filled if this message was sent.
@@ -93,10 +97,11 @@ public abstract class Message {
   }
 
   /**
-   * With Connection and an valid ByteArray this Constructor initialises an Message Object.
+   * With a Connection and a valid byte array this constructor initialises a
+   * Message object.
    * 
    * @param con Connection to the OMAPI Server
-   * @param m Valid ByteArray from InputStream
+   * @param m Valid byte array from InputStream
    * @throws OmapiObjectException if the construction fails
    */
   protected Message(Connection con, byte[] m) throws OmapiException {
@@ -218,7 +223,7 @@ public abstract class Message {
       "{} extended with attribute: `{key: '{}', value: '{}}`",
       this.getClass().getName(),
       key,
-      Hex.toHexF(value)
+      HexFormatter.withSpaces(value)
     );
   }
 
@@ -303,12 +308,19 @@ public abstract class Message {
     try {
       this.connection.out.write(this.toByteArray());
       this.connection.out.flush();
-      byte[] b = new byte[1024];
-      int count = (this.connection.in.read(b));
-      ByteBuffer bb = ByteBuffer.allocate(count);
-      bb.put(b, 0, count);
-      this.answer = bb.array();
+
+      byte[] buffer = new byte[1024];
+      int count = (this.connection.in.read(buffer, 0, 1024));
+
+      if (count > 0) {
+        this.answer = new byte[count];
+        System.arraycopy(buffer, 0, this.answer, 0, count);
+      } else if (count == -1) {
+        throw new IOException("Remote host rejected authentication");
+      }
     } catch (IOException e) {
+      log.error("Couldn't write data to connection: `{}`", e.getMessage());
+      log.debug(e.toString());
       throw new OmapiConnectionException(e.getMessage());
     }
 
@@ -440,11 +452,11 @@ public abstract class Message {
     int pll = this.getPayload().length;
     int al = Convert.byteArrayToInt(this.authlen);
     int size = hl + pll + al;
-    if (!this.connection.init) {
+    if (!this.connection.initialized) {
       size = size + 8;
     }
     ByteBuffer bb = ByteBuffer.allocate(size);
-    if (!this.connection.init) {
+    if (!this.connection.initialized) {
       bb.put(this.connection.initValue());
     }
     bb.put(this.authid);
@@ -593,7 +605,7 @@ public abstract class Message {
    * <p>Commits the Data to the server and returns the byteArray from the
    * answer.</p>
    *
-   * <p>There are severall options for the parameter action.
+   * <p>There are several options for the parameter action.
    * Use these constants:</p>
    *
    * <ul>
@@ -612,7 +624,7 @@ public abstract class Message {
   protected byte[] sendMessage(MessageType messageType) throws OmapiException {
     this.opcode = Convert.intTo4ByteArray(messageType.value());
     this.tid = this.newTid();
-    this.rid = Convert.intTo4ByteArray(0);
+    this.rid = new byte[4];
 
     switch (messageType.value()) {
       case MessageType.DEL_VALUE:
@@ -696,7 +708,10 @@ public abstract class Message {
    * @throws OmapiObjectException if not well formatted
    */
   protected void setObjectAsMacAddress(String key, String value) throws OmapiObjectException {
-    this.addObj(key, Convert.mac2hex(value));
+    this.addObj(
+      key,
+      hex.decode(value.replace(":", "").toUpperCase())
+    );
   }
 
   /**
