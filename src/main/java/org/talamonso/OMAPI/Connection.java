@@ -1,5 +1,6 @@
 package org.talamonso.OMAPI;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,6 +13,7 @@ import com.google.common.primitives.Bytes;
 import com.jrfom.util.HexFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talamonso.OMAPI.Exceptions.OmapiConnectionClosedException;
 import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Objects.Authenticator;
@@ -145,7 +147,7 @@ public class Connection {
       this.key = Base64.getDecoder().decode(k);
 
       Authenticator a = new Authenticator(this, name);
-      a.send(MessageType.OPEN);
+      a.send(MessageOperation.OPEN);
       this.useAuth = true;
     } catch (IllegalArgumentException e) {
       this.key = null;
@@ -203,6 +205,75 @@ public class Connection {
   protected void updateInit() {
     if (!this.initialized) {
       this.initialized = true;
+    }
+  }
+
+  /**
+   * Reads data from the remote host and returns it without processing.
+   *
+   * @return An array of bytes representing the data returned from the remote
+   *         host
+   * @throws OmapiConnectionException Thrown if the remote host has closed the
+   *         connection (probably rejected authentication) or some other error
+   *         in reading the stream has occurred.
+   */
+  public byte[] read() throws OmapiConnectionException {
+    byte[] result = null;
+
+    try {
+      ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+      byte[] inBytes = new byte[256];
+      int count = this.in.read(inBytes);
+
+      if (count == -1) {
+        // If the initial read is -1, then we got rejected.
+        // Probably because the remote host didn't like our authentication
+        // header.
+        log.error("Remote host closed the connection");
+        throw new OmapiConnectionClosedException();
+      }
+
+      while (count > 0) {
+        byte[] b = new byte[count];
+        System.arraycopy(inBytes, 0, b, 0, count);
+        buffer.write(b);
+
+        inBytes = new byte[256];
+        count = this.in.read(inBytes);
+      }
+
+      result = buffer.toByteArray();
+    } catch (IOException e) {
+      String exMessage = String.format(
+        "Couldn't read data from the connection: `%s`",
+        e.getMessage()
+      );
+      log.error(exMessage);
+      log.debug(e.toString());
+      throw new OmapiConnectionException(exMessage);
+    }
+
+    return result;
+  }
+
+  /**
+   * Writes an array of bytes to the remote host.
+   *
+   * @param data The data to write
+   * @throws OmapiConnectionException
+   */
+  public void write(byte[] data) throws OmapiConnectionException {
+    try {
+      this.out.write(data);
+      this.out.flush();
+    } catch (IOException e) {
+      String exMessage = String.format(
+        "Couldn't write data to the connection: `%s`",
+        e.getMessage()
+      );
+      log.error(exMessage);
+      log.debug(e.toString());
+      throw new OmapiConnectionException(exMessage);
     }
   }
 

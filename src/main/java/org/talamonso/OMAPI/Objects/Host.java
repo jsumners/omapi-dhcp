@@ -8,7 +8,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 
 import com.widget.util.Hex;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * Host Object Class.
@@ -101,16 +101,16 @@ public class Host extends Message {
   /**
    * Send this host object to the DHCP server and returns the answer as a new host object.
    * 
-   * @param messageType like MessageType.OPEN, MessageType.DELETE, ...
+   * @param messageOperation like MessageType.OPEN, MessageType.DELETE, ...
    * @return answer from the server as a new Host object
    * @throws OmapiObjectException is thrown, if Object creation fails
    * @throws OmapiInitException is thrown, if initialisation if connection fails
    * @throws OmapiConnectionException is thrown if connection fails
    */
-  public Host send(MessageType messageType) throws OmapiException {
+  public Host send(MessageOperation messageOperation) throws OmapiException {
     return new Host(
       this.connection,
-      super.sendMessage(messageType)
+      super.sendMessage(messageOperation)
     );
   }
 

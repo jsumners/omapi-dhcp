@@ -18,8 +18,8 @@ public class Default {
   public static Connection getC() {
     Connection c = null;
     try {
-      c = new Connection("192.168.2.150", 9991);
-      c.setAuth("omapi_key", "2YdVRKaJ4x41lDqHfA8rl8pHx95C4PmBgPcf5hIJ8j417HFN0AxUBEo6/3FoYyWjPyvXXCd+H6fPygtZd/iKxQ==");
+      c = new Connection("10.37.129.3", 7911);
+      c.setAuth("omapi_key", "fm2zoJB6CRHCdb//ilMYxiIkfcLFJ0nLaX6EAynK85Wl1diycVMnJ3uie7bMWwSdf4u2y31t+XvjPnVfqNJekw==");
     } catch (OmapiException e) {
       System.err.println(e.getMessage());
     }

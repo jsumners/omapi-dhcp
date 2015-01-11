@@ -6,7 +6,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * Group Object Class.
@@ -71,16 +71,16 @@ public class Group extends Message {
   /**
    * Send the group object to the server
    * 
-   * @param messageType
+   * @param messageOperation
    * @return returns a new group object with the response of the Server
    * @throws OmapiConnectionException
    * @throws OmapiObjectException
    * @throws OmapiInitException
    */
-  public Group send(MessageType messageType) throws OmapiException {
+  public Group send(MessageOperation messageOperation) throws OmapiException {
     return new Group(
       this.connection,
-      super.sendMessage(messageType)
+      super.sendMessage(messageOperation)
     );
   }
 

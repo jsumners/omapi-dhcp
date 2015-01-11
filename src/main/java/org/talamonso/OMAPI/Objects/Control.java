@@ -8,7 +8,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 import org.talamonso.OMAPI.Message;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * Control object class.
@@ -42,16 +42,16 @@ public class Control extends Message {
   /**
    * Send the control object to the DHCP server.
    * 
-   * @param messageType
+   * @param messageOperation
    * @return the control object answer from the server
    * @throws OmapiObjectException
    * @throws OmapiInitException
    * @throws OmapiConnectionException
    */
-  public Control send(MessageType messageType) throws OmapiException {
+  public Control send(MessageOperation messageOperation) throws OmapiException {
     return new Control(
       this.connection,
-      super.sendMessage(messageType)
+      super.sendMessage(messageOperation)
     );
   }
 
@@ -64,7 +64,7 @@ public class Control extends Message {
    */
   public void shutdown() throws OmapiException {
     this.updateObjectAsInt("state", 2);
-    this.send(MessageType.UPDATE);
+    this.send(MessageOperation.UPDATE);
   }
 
   /**

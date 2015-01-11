@@ -2,7 +2,7 @@ package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 import org.talamonso.OMAPI.Objects.Lease;
 
 /**
@@ -21,8 +21,9 @@ public class Lease_Open {
     Connection c = Default.getC();
     try {
       Lease l = new Lease(c);
-      l.setIPAddress("192.168.1.23");
-      Lease remote = l.send(MessageType.OPEN);
+      //l.setIPAddress("192.168.1.23");
+      l.setHardwareAddress("00:1c:42:db:33:a4");
+      Lease remote = l.send(MessageOperation.OPEN);
       System.out.println(remote);
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

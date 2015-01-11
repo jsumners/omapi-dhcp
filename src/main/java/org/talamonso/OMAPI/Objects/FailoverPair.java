@@ -7,7 +7,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * FailoverState class
@@ -177,16 +177,16 @@ public class FailoverPair extends Message {
   }
 
   /**
-   * @param messageType
+   * @param messageOperation
    * @return response
    * @throws OmapiObjectException
    * @throws OmapiInitException
    * @throws OmapiConnectionException
    */
-  public FailoverPair send(MessageType messageType) throws OmapiException {
+  public FailoverPair send(MessageOperation messageOperation) throws OmapiException {
     return new FailoverPair(
       this.connection,
-      super.sendMessage(messageType)
+      super.sendMessage(messageOperation)
     );
   }
 

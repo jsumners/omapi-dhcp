@@ -6,7 +6,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiConnectionException;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * This class initialises the authentication. Normaly it is used by the setAuth() Method in the Connection Class.
@@ -44,16 +44,16 @@ public class Authenticator extends Message {
   /**
    * Send the authenticator to the server
    * 
-   * @param messageType
+   * @param messageOperation
    * @return returns a new authenticator object with the response of the Server
    * @throws OmapiConnectionException
    * @throws OmapiObjectException
    * @throws OmapiInitException
    */
-  public Authenticator send(MessageType messageType) throws OmapiException {
+  public Authenticator send(MessageOperation messageOperation) throws OmapiException {
     return new Authenticator(
       this.connection,
-      this.sendMessage(messageType)
+      this.sendMessage(messageOperation)
     );
   }
 }

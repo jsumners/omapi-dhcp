@@ -2,7 +2,7 @@ package org.talamonso.OMAPI.Examples;
 
 import org.talamonso.OMAPI.Connection;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 import org.talamonso.OMAPI.Objects.Host;
 
 /**
@@ -23,7 +23,7 @@ public class Host_Open {
       Host h = new Host(c);
       h.setHardwareAddress("00:00:00:00:00:11");
       // h.setName("albert");
-      Host remote = h.send(MessageType.OPEN);
+      Host remote = h.send(MessageOperation.OPEN);
       System.out.println(remote);
     } catch (OmapiException e) {
       System.err.println(e.getMessage());

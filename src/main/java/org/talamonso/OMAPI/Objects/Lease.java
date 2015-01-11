@@ -9,7 +9,7 @@ import org.talamonso.OMAPI.Exceptions.OmapiInitException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
 
 import com.widget.util.Hex;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * Lease Object Class.
@@ -49,9 +49,9 @@ public class Lease extends Message {
    * @throws OmapiObjectException
    */
   public void delete() throws OmapiException {
-    Lease expire = this.send(MessageType.OPEN);
+    Lease expire = this.send(MessageOperation.OPEN);
     expire.updateState(LeaseState.FREE);
-    expire.send(MessageType.UPDATE);
+    expire.send(MessageOperation.UPDATE);
   }
 
   /**
@@ -185,15 +185,15 @@ public class Lease extends Message {
   /**
    * sends the object to the server
    * 
-   * @param messageType
+   * @param messageOperation
    * @return server answer as a lease object.
    * @throws OmapiConnectionException
    * @throws OmapiObjectException
    * @throws OmapiInitException
    */
-  public Lease send(MessageType messageType) throws OmapiException {
+  public Lease send(MessageOperation messageOperation) throws OmapiException {
     return new Lease(
-      this.connection, this.sendMessage(messageType)
+      this.connection, this.sendMessage(messageOperation)
     );
   }
 

@@ -5,7 +5,7 @@ import org.talamonso.OMAPI.Convert;
 import org.talamonso.OMAPI.Message;
 import org.talamonso.OMAPI.Exceptions.OmapiException;
 import org.talamonso.OMAPI.Exceptions.OmapiObjectException;
-import org.talamonso.OMAPI.MessageType;
+import org.talamonso.OMAPI.MessageOperation;
 
 /**
  * As long as the subnet object isn't supported by the server this object is just virtual to get all depending leases
@@ -52,7 +52,7 @@ public class Subnet extends Message {
       la[(int) count] = new Lease(this.connection);
       try {
         la[(int) count].setIPAddress(Convert.long2ip(now));
-        la[(int) count] = la[(int) count].send(MessageType.OPEN);
+        la[(int) count] = la[(int) count].send(MessageOperation.OPEN);
       } catch (OmapiException e) {
         la[(int) count] = null;
       }

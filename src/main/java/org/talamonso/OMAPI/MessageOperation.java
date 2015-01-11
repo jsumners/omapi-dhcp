@@ -2,7 +2,7 @@ package org.talamonso.OMAPI;
 
 import java.io.Serializable;
 
-public class MessageType implements Comparable<MessageType>, Serializable {
+public class MessageOperation implements Comparable<MessageOperation>, Serializable {
   private static final long serialVersionUID = 2L;
 
   public static final int UNKNOWN_VALUE = -1;
@@ -16,16 +16,16 @@ public class MessageType implements Comparable<MessageType>, Serializable {
   public static final int DELETE_VALUE = 8;
   public static final int UPDATE_VALUE = 9;
 
-  public static final MessageType UNKNOWN;
-  public static final MessageType OPEN;
-  public static final MessageType REFRESH;
-  public static final MessageType UPD;
-  public static final MessageType NOTIFY;
-  public static final MessageType ERROR;
-  public static final MessageType DEL;
-  public static final MessageType CREATE;
-  public static final MessageType DELETE;
-  public static final MessageType UPDATE;
+  public static final MessageOperation UNKNOWN;
+  public static final MessageOperation OPEN;
+  public static final MessageOperation REFRESH;
+  public static final MessageOperation UPD;
+  public static final MessageOperation NOTIFY;
+  public static final MessageOperation ERROR;
+  public static final MessageOperation DEL;
+  public static final MessageOperation CREATE;
+  public static final MessageOperation DELETE;
+  public static final MessageOperation UPDATE;
 
   static {
     UNKNOWN = typeOf(UNKNOWN_VALUE);
@@ -42,12 +42,12 @@ public class MessageType implements Comparable<MessageType>, Serializable {
 
   private final String type;
 
-  public MessageType(String type) {
+  public MessageOperation(String type) {
     this.type = type.toUpperCase();
   }
 
-  public MessageType(int typeValue) {
-    this.type = MessageType.typeForValue(typeValue);
+  public MessageOperation(int typeValue) {
+    this.type = MessageOperation.typeForValue(typeValue);
   }
 
   public String getType() {
@@ -55,11 +55,11 @@ public class MessageType implements Comparable<MessageType>, Serializable {
   }
 
   public int value() {
-    return MessageType.valueForType(this.type);
+    return MessageOperation.valueForType(this.type);
   }
 
-  public static MessageType typeOf(int value) {
-    return new MessageType(value);
+  public static MessageOperation typeOf(int value) {
+    return new MessageOperation(value);
   }
 
   public static String typeForValue(int value) {
@@ -105,34 +105,34 @@ public class MessageType implements Comparable<MessageType>, Serializable {
 
     switch (type) {
       case "OPEN":
-        result = MessageType.OPEN_VALUE;
+        result = MessageOperation.OPEN_VALUE;
         break;
       case "REFRESH":
-        result = MessageType.REFRESH_VALUE;
+        result = MessageOperation.REFRESH_VALUE;
         break;
       case "UPD":
-        result = MessageType.UPD_VALUE;
+        result = MessageOperation.UPD_VALUE;
         break;
       case "NOTIFY":
-        result = MessageType.NOTIFY_VALUE;
+        result = MessageOperation.NOTIFY_VALUE;
         break;
       case "ERROR":
-        result = MessageType.ERROR_VALUE;
+        result = MessageOperation.ERROR_VALUE;
         break;
       case "DEL":
-        result = MessageType.DEL_VALUE;
+        result = MessageOperation.DEL_VALUE;
         break;
       case"DELETE":
-        result = MessageType.DELETE_VALUE;
+        result = MessageOperation.DELETE_VALUE;
         break;
       case "CREATE":
-        result = MessageType.CREATE_VALUE;
+        result = MessageOperation.CREATE_VALUE;
         break;
       case "UPDATE":
-        result = MessageType.UPDATE_VALUE;
+        result = MessageOperation.UPDATE_VALUE;
         break;
       default:
-        result = MessageType.UNKNOWN_VALUE;
+        result = MessageOperation.UNKNOWN_VALUE;
         break;
     }
 
@@ -140,7 +140,7 @@ public class MessageType implements Comparable<MessageType>, Serializable {
   }
 
   @Override
-  public int compareTo(MessageType o) {
+  public int compareTo(MessageOperation o) {
     int result = 0;
     int oValue = o.value();
     int tValue = this.value();
@@ -152,5 +152,10 @@ public class MessageType implements Comparable<MessageType>, Serializable {
     }
 
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return MessageOperation.typeForValue(this.value());
   }
 }

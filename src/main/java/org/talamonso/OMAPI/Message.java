@@ -144,14 +144,14 @@ public abstract class Message {
    * @throws OmapiObjectException if the Object has an error
    */
   public void delete() throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(MessageType.DELETE_VALUE);
+    this.opcode = Convert.intTo4ByteArray(MessageOperation.DELETE_VALUE);
     this.tid = this.newTid();
     this.rid = Convert.intTo4ByteArray(0);
     // We first need to have a handle!
     new EmptyMessage(
       this.connection,
-      this.sendMessage(MessageType.OPEN)
-    ).sendMessage(MessageType.DEL);
+      this.sendMessage(MessageOperation.OPEN)
+    ).sendMessage(MessageOperation.DEL);
   }
 
   /**
@@ -168,7 +168,7 @@ public abstract class Message {
     x.handle = Convert.intTo4ByteArray(h);
     x = new EmptyMessage(
       this.connection,
-      x.sendMessage(MessageType.REFRESH)
+      x.sendMessage(MessageOperation.REFRESH)
     );
     return x;
   }
@@ -301,7 +301,7 @@ public abstract class Message {
   private byte[] commit(int action) throws OmapiConnectionException {
     log.debug(
       "Trying to {} {}",
-      MessageType.typeForValue(action),
+      MessageOperation.typeForValue(action),
       this.getClass().getName()
     );
 
@@ -327,7 +327,7 @@ public abstract class Message {
     this.connection.updateInit();
     log.debug(
       " - Successfully {}ed ...",
-      MessageType.typeForValue(action)
+      MessageOperation.typeForValue(action)
     );
 
     return this.answer;
@@ -609,59 +609,59 @@ public abstract class Message {
    * Use these constants:</p>
    *
    * <ul>
-   *   <li>{@link org.talamonso.OMAPI.MessageType#OPEN}</li>
-   *   <li>{@link org.talamonso.OMAPI.MessageType#REFRESH}</li>
-   *   <li>{@link org.talamonso.OMAPI.MessageType#UPDATE}</li>
-   *   <li>{@link org.talamonso.OMAPI.MessageType#CREATE}</li>
+   *   <li>{@link MessageOperation#OPEN}</li>
+   *   <li>{@link MessageOperation#REFRESH}</li>
+   *   <li>{@link MessageOperation#UPDATE}</li>
+   *   <li>{@link MessageOperation#CREATE}</li>
    * </ul>
    * 
-   * @param messageType shown above
+   * @param messageOperation shown above
    * @return the answer of the server as a ByteArray
    * @throws OmapiConnectionException if the connection fails
    * @throws OmapiInitException if the initialisation fails
    * @throws OmapiObjectException if the Object has an error
    */
-  protected byte[] sendMessage(MessageType messageType) throws OmapiException {
-    this.opcode = Convert.intTo4ByteArray(messageType.value());
+  protected byte[] sendMessage(MessageOperation messageOperation) throws OmapiException {
+    this.opcode = Convert.intTo4ByteArray(messageOperation.value());
     this.tid = this.newTid();
     this.rid = new byte[4];
 
-    switch (messageType.value()) {
-      case MessageType.DEL_VALUE:
-      case MessageType.REFRESH_VALUE:
+    switch (messageOperation.value()) {
+      case MessageOperation.DEL_VALUE:
+      case MessageOperation.REFRESH_VALUE:
         // We don't need to have the payload for DELETE and REFRESH
         this.msg = new LinkedHashMap();
         this.obj = new LinkedHashMap();
         // break for REFRESH!
         break;
 
-      case MessageType.CREATE_VALUE:
+      case MessageOperation.CREATE_VALUE:
         this.handle = Convert.intTo4ByteArray(1);
-        this.opcode = Convert.intTo4ByteArray(MessageType.OPEN.value());
+        this.opcode = Convert.intTo4ByteArray(MessageOperation.OPEN.value());
         this.addMsg("create", Convert.intTo4ByteArray(1));
         this.addMsg("exclusive", Convert.intTo4ByteArray(1));
         break;
 
-      case MessageType.UPDATE_VALUE:
+      case MessageOperation.UPDATE_VALUE:
         EmptyMessage in = new EmptyMessage(
           this.connection,
-          this.sendMessage(MessageType.OPEN)
+          this.sendMessage(MessageOperation.OPEN)
         );
         in.obj = this.upd_obj;
-        in.sendMessage(MessageType.UPD);
+        in.sendMessage(MessageOperation.UPD);
         // FIXME: I don't like this return. ~ jsumners
-        return in.sendMessage(MessageType.REFRESH);
+        return in.sendMessage(MessageOperation.REFRESH);
         //break;
 
-      case MessageType.OPEN_VALUE:
-      case MessageType.UPD_VALUE:
+      case MessageOperation.OPEN_VALUE:
+      case MessageOperation.UPD_VALUE:
         break;
 
       default:
         throw new OmapiConnectionException("Unknown command");
     }
 
-    return this.commit(messageType.value());
+    return this.commit(messageOperation.value());
   }
 
   /**
